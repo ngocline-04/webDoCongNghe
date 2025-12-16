@@ -3,6 +3,10 @@
 /**
  * DO NOT MODIFY ANYTHING HERE
  */
+require_once 'vendor/autoload.php';
+
+$dotnetEnv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotnetEnv->load();
 session_start();
 
 $controllerName = isset($_GET['controller']) ? ucfirst($_GET['controller']).'Controller' : 'DefaultController';
