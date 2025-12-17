@@ -8,7 +8,9 @@ require_once('app/Models/Admin/Discount.php');
 require_once('core/Storage.php');
 require_once('core/Unit.php');
 require_once('core/Auth.php');
-
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class ProductController extends BackendController
 {
@@ -123,6 +125,96 @@ class ProductController extends BackendController
 
         return $this->view('product/product.php', $data);
     }
+
+
+
+public function importExcel()
+{
+    if (!isset($_FILES['excel_file'])) {
+        return redirect('admin/product');
+    }
+
+    $file = $_FILES['excel_file']['tmp_name'];
+    $spreadsheet = IOFactory::load($file);
+    $rows = $spreadsheet->getActiveSheet()->toArray();
+
+    // Bỏ dòng header
+    unset($rows[0]);
+
+    $productModel = new Product();
+    $categoryModel = new Category();
+
+    // Lấy tất cả category và map name => id
+    $categories = $categoryModel->findAll();
+    $categoryMap = [];
+    foreach ($categories as $cat) {
+        $categoryMap[mb_strtolower(trim($cat['name']))] = $cat['id'];
+    }
+
+    foreach ($rows as $row) {
+
+        if (empty($row[0])) continue;
+
+        $categoryName = mb_strtolower(trim($row[3]));
+
+        // Nếu không tìm thấy danh mục → bỏ qua
+        if (!isset($categoryMap[$categoryName])) {
+            continue;
+        }
+
+        $data = [
+            'name'        => trim($row[0]),
+            'price'       => (int)$row[1],
+            'amount'      => (int)$row[2],
+            'category_id' => $categoryMap[$categoryName],
+            'thumbnail'   => trim($row[4]),
+            'description' => trim($row[5]),
+        ];
+
+        $productModel->create($data);
+    }
+
+    return redirect('admin/product');
+}
+
+
+public function exportExcel()
+{
+    $productModel = new Product();
+    $products = $productModel->findAll();
+
+    $spreadsheet = new Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+
+    // Header
+    $sheet->setCellValue('A1', 'name');
+    $sheet->setCellValue('B1', 'price');
+    $sheet->setCellValue('C1', 'amount');
+    $sheet->setCellValue('D1', 'category_id');
+    $sheet->setCellValue('E1', 'thumbnail');
+    $sheet->setCellValue('F1', 'description');
+
+    $row = 2;
+    foreach ($products as $product) {
+        $sheet->setCellValue('A'.$row, $product['name']);
+        $sheet->setCellValue('B'.$row, $product['price']);
+        $sheet->setCellValue('C'.$row, $product['amount']);
+        $sheet->setCellValue('D'.$row, $product['category_id']);
+        $sheet->setCellValue('E'.$row, $product['thumbnail']);
+        $sheet->setCellValue('F'.$row, $product['description']);
+        $row++;
+    }
+
+    // Xuất file
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header('Content-Disposition: attachment; filename="products.xlsx"');
+    header('Cache-Control: max-age=0');
+
+    $writer = new Xlsx($spreadsheet);
+    $writer->save('php://output');
+    exit;
+}
+
 
 
 }

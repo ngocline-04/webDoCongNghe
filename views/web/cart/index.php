@@ -26,6 +26,7 @@ $(document).ready(function() {
             url: '<?=url('cart/cart')?>',
             success : function(data) {
                 $('.show_cart').html(data)
+                calcTotal();
             }
         })
     }
@@ -75,6 +76,7 @@ $(document).ready(function() {
     })
         return false;
     }
+    
 
 })
 

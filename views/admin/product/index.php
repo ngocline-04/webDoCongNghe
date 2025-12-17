@@ -50,6 +50,21 @@ Product
                                     <option value=""></option>
                                 </select>
                             </div>
+                            <div class="col-sm-3 text-right">
+                                <a 
+                                 href="<?=url('admin/product/exportExcel')?>"
+                                 class="btn btn-primary"
+                                >
+                                Export Excel
+                                </a>
+                              <button 
+                                 class="btn btn-success"
+                                data-toggle="modal"
+                                data-target="#importProductModal"
+                                >
+                             Import Excel
+                               </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -211,4 +226,55 @@ $(document).ready(function() {
     })
 })
 </script>
+<!-- MODAL IMPORT PRODUCT -->
+<div class="modal fade" id="importProductModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <form 
+        action="<?=url('admin/product/importExcel')?>"
+        method="POST"
+        enctype="multipart/form-data"
+        class="modal-content"
+    >
+
+      <div class="modal-header">
+        <h5 class="modal-title">Import sản phẩm từ Excel</h5>
+        <button type="button" class="close" data-dismiss="modal">
+          <span>&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="form-group">
+            <label>Chọn file Excel (.xlsx)</label>
+            <input 
+                type="file"
+                name="excel_file"
+                class="form-control"
+                accept=".xlsx,.xls"
+                required
+            >
+        </div>
+
+        <div class="alert alert-info">
+            <b>Định dạng file Excel:</b><br>
+            A: Tên sản phẩm<br>
+            B: Giá tiền<br>
+            C: Hình ảnh<br>
+            D: Số lượng<br>
+        
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-success">
+            Import
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+
 <?php endblock() ?>

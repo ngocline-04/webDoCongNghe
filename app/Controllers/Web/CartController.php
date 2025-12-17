@@ -79,4 +79,5 @@ class CartController extends WebController
 
         $updateQuantityCart = $cart->update_quantity($id,$quantity);
     }
+    
 }

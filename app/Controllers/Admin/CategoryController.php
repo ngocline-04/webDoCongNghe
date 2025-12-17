@@ -4,6 +4,7 @@ require_once('app/Controllers/Admin/BackendController.php');
 require_once('app/Models/Model.php');
 require_once('core/Auth.php');
 require_once('app/Models/Admin/Category.php');
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class CategoryController extends BackendController
 {
@@ -54,4 +55,39 @@ class CategoryController extends BackendController
         $category = $category->delete($id);
         return redirect('admin/category');
     }
+    public function importExcel()
+{
+    if (!isset($_FILES['excel_file'])) {
+        return redirect('admin/category');
+    }
+
+    $file = $_FILES['excel_file']['tmp_name'];
+
+    try {
+        $spreadsheet = IOFactory::load($file);
+        $sheet = $spreadsheet->getActiveSheet();
+        $rows = $sheet->toArray();
+
+        $categoryModel = new Category();
+
+        foreach ($rows as $index => $row) {
+            if ($index == 0) continue;
+
+            $name = trim($row[0]);
+
+            if ($name != '') {
+                $categoryModel->create([
+                    'name' => $name
+                ]);
+            }
+        }
+
+        return redirect('admin/category');
+
+    } catch (Exception $e) {
+        echo "Lỗi import: " . $e->getMessage();
+        die();
+    }
+}
+
 }

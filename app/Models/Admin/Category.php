@@ -17,4 +17,15 @@ class Category extends Model
     {
         return $this->find($id);
     }
+    public function existsByName($name)
+{
+    $sql = "SELECT id FROM {$this->table} WHERE name = ?";
+    $stmt = $this->dbConnection->prepare($sql);
+    $stmt->bind_param("s", $name);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    return $result->num_rows > 0;
+}
+
 }

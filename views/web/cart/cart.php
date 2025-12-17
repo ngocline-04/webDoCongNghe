@@ -13,10 +13,12 @@
         <!-- /page_header -->
         <table class="table table-striped cart-list">
             <thead>
-                <tr>
-                    <th style="width : 48%">
-                        Sản phẩm
-                    </th>
+        <tr>
+        <th style="width:3%">
+            <input type="checkbox" id="checkAll" checked>
+        </th>
+        <th style="width : 45%">Sản phẩm</th>
+
                     <th style="width : 10%">
                         Giá gốc
                     </th>
@@ -35,7 +37,19 @@
             </thead>
             <tbody>
                 <?php foreach($data as $key => $cart) :?>
-                <tr>
+<tr>
+    <td>
+       <input 
+    type="checkbox"
+    class="cart-check"
+    data-id="<?=$cart['id']?>"
+    data-price="<?=$cart['price']?>"
+    data-qty="<?=$cart['quantity']?>"
+    checked
+>
+
+    </td>
+
                     <td>
                         <div class="thumb_cart">
                             <img src="<?php echo asset('storage/thumbnail/'.$cart['thumbnail']); ?>"
@@ -95,18 +109,21 @@
             <div class="row justify-content-end">
                 <div class="col-xl-4 col-lg-4 col-md-6">
                     <ul>
-                        <li>
-                            <span>Tổng tiền
-                                hàng</span><?php if(!empty($cart)){echo Unit::format_VND(Unit::total_price($data));} else{echo '0đ';}?>
-                        </li>
-                        <li>
-                            <span>Phí vận chuyển</span>0đ
-                        </li>
-                        <li>
-                            <span>Tổng Thanh
-                                toán</span><?php if(!empty($cart)){echo Unit::format_VND(Unit::total_price($data));} else{echo '0đ';}?>
-                        </li>
-                    </ul>
+   <li style="display:flex; justify-content:space-between;">
+    <span>Tổng tiền hàng</span>
+    <span id="totalPrice">0đ</span>
+</li>
+
+    <li>
+        <span>Phí vận chuyển</span>0đ
+    </li>
+   <li style="display:flex; justify-content:space-between;">
+    <span>Tổng Thanh toán</span>
+    <span id="finalPrice">0đ</span>
+</li>
+
+</ul>
+
                     <a href="<?php if (!Auth::getUser('user')) { echo url('auth/login'); } else { echo url('order'); }?>" class="btn_1 full-width cart">Thanh toán ngay</a>
                 </div>
             </div>
@@ -130,5 +147,41 @@
 		<!-- /row -->
 	</div>
 	<!-- /container -->
-	
+
+
     <?php endif; ?>
+<script>
+function formatVND(number) {
+    return number.toLocaleString('vi-VN') + 'đ';
+}
+
+function calcTotal() {
+    let total = 0;
+
+    document.querySelectorAll('.cart-check:checked').forEach(cb => {
+        const price = Number(cb.dataset.price);
+        const qty   = Number(cb.dataset.qty);
+        total += price * qty;
+    });
+
+    document.getElementById('totalPrice').innerText = formatVND(total);
+    document.getElementById('finalPrice').innerText = formatVND(total);
+}
+
+document.querySelectorAll('.cart-check').forEach(cb => {
+    cb.addEventListener('change', calcTotal);
+});
+
+const checkAll = document.getElementById('checkAll');
+if (checkAll) {
+    checkAll.addEventListener('change', function () {
+        document.querySelectorAll('.cart-check').forEach(cb => {
+            cb.checked = this.checked;
+        });
+        calcTotal();
+    });
+}
+
+calcTotal();
+</script>
+
